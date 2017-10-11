@@ -4,16 +4,132 @@
 #include <fstream>
 #include <stdlib.h>
 #include <time.h> 
+#include <exception>  
 #include "../sudoku_2/core.h"
 
-bool Core::solve(int* puzzle, int* solution)
+ 
+
+class numberException :public std::exception
+{
+public:
+    numberException():exception("Exception: sudoku number error\n")
+    {
+    }
+};
+
+class boundException :public std::exception
+{
+public:
+    boundException() :exception("Exception: lower or upper error\n")
+    {
+    }
+};
+
+class modeException :public std::exception
+{
+public:
+    modeException() :exception("Exception: sudoku mode error\n")
+    {
+    }
+};
+
+bool Core::solve(int puzzle[81], int solution[81])
 {
     int tag = -1;
     DLX(puzzle, solution, tag);
     return true;
 }
 
-bool Core::blank(int* puzzle, int mode, int* result)
+void Core::generate(int number, int result[][81])
+{
+    int count_total = 0;
+    int nums1[9] = { 7,1,2,3,4,5,6,8,9 };
+    int nums[9] = { 0 };
+    int sudo[9][9] = { 0 };
+    int mark[9] = { 0 };
+    if (number < 1 || number>1000000)
+    {
+        throw numberException();
+        return;
+    }
+    for (int i = 0; i < 9; i++) {
+        int count = 0;
+        int move = (rand() % (9 - i) + 1);
+        for (int j = 0; j < 9; j++) {
+            if (mark[j] == 0) count++;
+            if (count == move) {
+                nums[i] = nums1[j];
+                mark[j] = 1;
+                break;
+            }
+        }
+    }
+    produce(number, nums, 0, count_total, 0, sudo, result);
+}
+
+void Core::generate(int number, int mode, int result[][81])
+{
+    int count_total = 0;
+    int nums1[9] = { 7,1,2,3,4,5,6,8,9 };
+    int nums[9] = { 0 };
+    int sudo[9][9] = { 0 };
+    int mark[9] = { 0 };
+    if (number < 1 || number>10000)
+    {
+        throw numberException();
+        return;
+    }
+    for (int i = 0; i < 9; i++) {
+        int count = 0;
+        int move = (rand() % (9 - i) + 1);
+        for (int j = 0; j < 9; j++) {
+            if (mark[j] == 0) count++;
+            if (count == move) {
+                nums[i] = nums1[j];
+                mark[j] = 1;
+                break;
+            }
+        }
+    }
+    produce(number, nums, 0, count_total, 0, sudo, result);
+    for (int i = 0; i < number; i++)
+    {
+        blank(result[i], mode, result[i]);
+    }
+}
+
+void Core::generate(int number, int lower, int upper, bool unique, int result[][81])
+{
+    int count_total = 0;
+    int nums1[9] = { 7,1,2,3,4,5,6,8,9 };
+    int nums[9] = { 0 };
+    int sudo[9][9] = { 0 };
+    int mark[9] = { 0 };
+    if (number < 1 || number>10000)
+    {
+        throw numberException();
+        return;
+    }
+    for (int i = 0; i < 9; i++) {
+        int count = 0;
+        int move = (rand() % (9 - i) + 1);
+        for (int j = 0; j < 9; j++) {
+            if (mark[j] == 0) count++;
+            if (count == move) {
+                nums[i] = nums1[j];
+                mark[j] = 1;
+                break;
+            }
+        }
+    }
+    produce(number, nums, 0, count_total, 0, sudo, result);
+    for (int i = 0; i < number; i++)
+    {
+        blank(result[i], lower, upper, unique, result[i]);
+    }
+}
+
+bool Core::blank(int puzzle[81], int mode, int result[81])
 {
     int lower;
     int upper;
@@ -32,19 +148,21 @@ bool Core::blank(int* puzzle, int mode, int* result)
         upper = 55;
         break;
     default:
+        throw modeException();
         return false;
     }
     return blank(puzzle, lower, upper, false, result);
 }
 
 
-bool Core::blank(int* puzzle, int lower, int upper, bool unique, int* result)
+bool Core::blank(int puzzle[81], int lower, int upper, bool unique, int result[81])
 {
     int blankNum = 0;
     int tag = -1;
     int temp[81] = { 0 };
     if (lower < 20 || upper>55 || lower > upper)
     {
+        throw boundException();
         return false;
     }
     for (int i = 0; i < 81; i++)
@@ -77,7 +195,7 @@ bool Core::blank(int* puzzle, int lower, int upper, bool unique, int* result)
     return true;
 }
 
-Node* Core::toMatrix(int* puzzle)
+Node* Core::toMatrix(int puzzle[81])
 {
     int row_num = 0;
     Node *head, *temp[4];
@@ -197,7 +315,7 @@ void Core::resume(Node* c)
     }
 }
 
-int Core::dance(Node* head, int* solution,int &tag)
+int Core::dance(Node* head, int solution[81],int &tag)
 {
     if (head->right == head)
     {
@@ -250,7 +368,7 @@ int Core::dance(Node* head, int* solution,int &tag)
     return 0;
 }
 
-int Core::DLX(int* puzzle, int* solution, int &tag)
+int Core::DLX(int puzzle[81], int solution[81], int &tag)
 {
     Node* head = toMatrix(puzzle);
     for (int i = 0; i < 81; i++)
@@ -258,4 +376,109 @@ int Core::DLX(int* puzzle, int* solution, int &tag)
         solution[i] = 0;
     }
     return dance(head, solution, tag);
+}
+
+bool Core::isinraw(int num, int raw_num, int sudo[9][9])
+{//行
+    for (int i = 0; i < 9; i++)
+    {
+        if (sudo[raw_num][i] == num)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+bool Core::isincolumn(int num, int c_num, int sudo[9][9])
+{//列
+    for (int i = 0; i < 9; i++)
+    {
+        if (sudo[i][c_num] == num)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+int Core::insert(int num, int blocknum, int marked[], int sudo[9][9])
+{
+
+    int pos[9] = { 0,1,2,3,4,5,6,7,8 };
+    int x;
+    int y;
+    for (int i = 0; i < 9; i++)
+    {
+        x = (pos[i] / 3) + ((blocknum - 1) / 3) * 3;
+        y = (pos[i] % 3) + (((blocknum - 1) % 3) * 3);
+        if (sudo[x][y] != 0 || marked[pos[i]] == 1 || isinraw(num, x, sudo) || isincolumn(num, y, sudo))
+        {
+            continue;
+        }
+        else
+        {
+            sudo[x][y] = num;
+            return pos[i];
+        }
+    }
+    return -1;
+}
+
+
+void Core::out(int sudo[9][9], int result[][81], int count_total)
+{
+    int count = 0;
+    for (int i = 0; i < 9; i++)
+    {
+        for (int j = 0; j < 9; j++)
+        {
+            result[count_total - 1][count++] = sudo[i][j];
+        }
+    }
+}
+
+void Core::produce(int total, int nums[], int block_num, int & count_total, int count_nums, int sudo[9][9], int result[][81])
+{
+    int marked[9] = { 0 };//标记已经试过的位置
+    int new_block_num, new_count_nums;
+    int now_sudo[9][9];
+    while (true)
+    {
+        new_block_num = block_num + 1;
+        new_count_nums = count_nums;
+        for (int i = 0; i < 9; i++)
+        {
+            for (int j = 0; j < 9; j++)
+            {
+                now_sudo[i][j] = sudo[i][j];
+            }
+        }
+        int now = insert(nums[new_count_nums], new_block_num, marked, now_sudo);
+
+        if (now < 0)
+        {
+            return;
+        }
+        else
+        {
+            marked[now] = 1;
+        }
+
+        if (new_block_num == 9)
+        {
+            if (new_count_nums < 8)
+            {
+                new_count_nums = count_nums + 1;
+                new_block_num = 0;
+            }
+            else
+            {//填写至最后一个
+                count_total++;
+                out(now_sudo, result, count_total);
+                return;
+            }
+        }
+        produce(total, nums, new_block_num, count_total, new_count_nums, now_sudo, result);
+        if (count_total == total) return;
+    }
 }
