@@ -7,32 +7,6 @@
 #include <exception>  
 #include "../sudoku_2/core.h"
 
- 
-
-class numberException :public std::exception
-{
-public:
-    numberException():exception("Exception: sudoku number error\n")
-    {
-    }
-};
-
-class boundException :public std::exception
-{
-public:
-    boundException() :exception("Exception: lower or upper error\n")
-    {
-    }
-};
-
-class modeException :public std::exception
-{
-public:
-    modeException() :exception("Exception: sudoku mode error\n")
-    {
-    }
-};
-
 bool Core::solve(int puzzle[81], int solution[81])
 {
     int tag = -1;
@@ -49,7 +23,6 @@ void Core::generate(int number, int result[][81])
     int mark[9] = { 0 };
     if (number < 1 || number>1000000)
     {
-        throw numberException();
         return;
     }
     for (int i = 0; i < 9; i++) {
@@ -76,7 +49,6 @@ void Core::generate(int number, int mode, int result[][81])
     int mark[9] = { 0 };
     if (number < 1 || number>10000)
     {
-        throw numberException();
         return;
     }
     for (int i = 0; i < 9; i++) {
@@ -107,7 +79,6 @@ void Core::generate(int number, int lower, int upper, bool unique, int result[][
     int mark[9] = { 0 };
     if (number < 1 || number>10000)
     {
-        throw numberException();
         return;
     }
     for (int i = 0; i < 9; i++) {
@@ -148,7 +119,6 @@ bool Core::blank(int puzzle[81], int mode, int result[81])
         upper = 55;
         break;
     default:
-        throw modeException();
         return false;
     }
     return blank(puzzle, lower, upper, false, result);
@@ -162,7 +132,6 @@ bool Core::blank(int puzzle[81], int lower, int upper, bool unique, int result[8
     int temp[81] = { 0 };
     if (lower < 20 || upper>55 || lower > upper)
     {
-        throw boundException();
         return false;
     }
     for (int i = 0; i < 81; i++)
