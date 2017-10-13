@@ -1,20 +1,43 @@
-#include <iostream>
+// Core.cpp : 定义 DLL 应用程序的导出函数。
+//
+
+#include "stdafx.h"
+
 #include <algorithm>
 #include <sstream>
 #include <fstream>
 #include <stdlib.h>
 #include <time.h> 
 #include <exception>  
-#include "../sudoku_2/core.h"
+#include "../Core/Core.h"
 
-bool Core::solve(int puzzle[81], int solution[81])
+
+
+
+numberException::numberException() :exception("Exception: sudoku number error\n")
+{
+}
+
+boundException::boundException() : exception("Exception: lower or upper error\n")
+{
+}
+
+modeException::modeException() : exception("Exception: sudoku mode error\n")
+{
+}
+
+bool __stdcall Core::solve(int puzzle[81], int solution[81])
 {
     int tag = -1;
     DLX(puzzle, solution, tag);
-    return true;
+    if (tag == 1)
+    {
+        return true;
+    }
+    return false;
 }
 
-void Core::generate(int number, int result[][81])
+void __stdcall Core::generate(int number, int result[][81])
 {
     int count_total = 0;
     int nums1[9] = { 7,1,2,3,4,5,6,8,9 };
@@ -23,6 +46,7 @@ void Core::generate(int number, int result[][81])
     int mark[9] = { 0 };
     if (number < 1 || number>1000000)
     {
+        throw numberException();
         return;
     }
     for (int i = 0; i < 9; i++) {
@@ -40,7 +64,7 @@ void Core::generate(int number, int result[][81])
     produce(number, nums, 0, count_total, 0, sudo, result);
 }
 
-void Core::generate(int number, int mode, int result[][81])
+void __stdcall Core::generate(int number, int mode, int result[][81])
 {
     int count_total = 0;
     int nums1[9] = { 7,1,2,3,4,5,6,8,9 };
@@ -49,6 +73,7 @@ void Core::generate(int number, int mode, int result[][81])
     int mark[9] = { 0 };
     if (number < 1 || number>10000)
     {
+        throw numberException();
         return;
     }
     for (int i = 0; i < 9; i++) {
@@ -66,11 +91,11 @@ void Core::generate(int number, int mode, int result[][81])
     produce(number, nums, 0, count_total, 0, sudo, result);
     for (int i = 0; i < number; i++)
     {
-        blank(result[i], mode, result[i]);
+        blank(result[i], mode);
     }
 }
 
-void Core::generate(int number, int lower, int upper, bool unique, int result[][81])
+void __stdcall Core::generate(int number, int lower, int upper, bool unique, int result[][81])
 {
     int count_total = 0;
     int nums1[9] = { 7,1,2,3,4,5,6,8,9 };
@@ -79,6 +104,7 @@ void Core::generate(int number, int lower, int upper, bool unique, int result[][
     int mark[9] = { 0 };
     if (number < 1 || number>10000)
     {
+        throw numberException();
         return;
     }
     for (int i = 0; i < 9; i++) {
@@ -94,16 +120,29 @@ void Core::generate(int number, int lower, int upper, bool unique, int result[][
         }
     }
     produce(number, nums, 0, count_total, 0, sudo, result);
+    int temp[81] = { 0 };
     for (int i = 0; i < number; i++)
     {
-        blank(result[i], lower, upper, unique, result[i]);
-    }
+        for (int j = 0; j < 81; j++)
+        {
+            temp[j] = result[i][j];
+        }
+        blank(temp, lower, upper, unique);
+        for (int j = 0; j < 81; j++)
+        {
+            if (temp[j] == 0)
+            {
+                result[i][j] = 0;;
+            }
+        }
+    } 
 }
 
-bool Core::blank(int puzzle[81], int mode, int result[81])
+bool __stdcall Core::blank(int puzzle[81], int mode)
 {
     int lower;
     int upper;
+    bool suc = false;
     switch (mode)
     {
     case 1:
@@ -119,50 +158,57 @@ bool Core::blank(int puzzle[81], int mode, int result[81])
         upper = 55;
         break;
     default:
+        throw modeException();
         return false;
     }
-    return blank(puzzle, lower, upper, false, result);
+    suc = blank(puzzle, lower, upper, false);
+    return suc;
 }
 
 
-bool Core::blank(int puzzle[81], int lower, int upper, bool unique, int result[81])
+bool __stdcall Core::blank(int puzzle[81], int lower, int upper, bool unique)
 {
     int blankNum = 0;
     int tag = -1;
-    int temp[81] = { 0 };
+    int temp[81];
+    int buf[81];
     if (lower < 20 || upper>55 || lower > upper)
     {
+        throw boundException();
         return false;
     }
-    for (int i = 0; i < 81; i++)
-    {
-        result[i] = puzzle[i];
+    for (int i = 0; i < 81; ++i) {
+        buf[i] = puzzle[i];
     }
-    srand((unsigned)time(NULL));
     blankNum = (rand() % (upper - lower + 1)) + lower;
     do
     {
+        for (int i = 0; i < 81; i++)
+        {
+            puzzle[i] = buf[i];
+        }
         int j = 0;
         for (int i = 0; i < blankNum; i++)
         {
             j = rand() % 81;
-            if (result[j] == 0)
+            if (puzzle[j] == 0)
             {
                 i--;
             }
             else
             {
-                result[j] = 0;
+                puzzle[j] = 0;
             }
         }
         if (unique)
         {
             tag = 0;
+            DLX(puzzle, temp, tag);
         }
-        DLX(result, temp, tag);
     } while (unique && (tag == 2));
     return true;
 }
+
 
 Node* Core::toMatrix(int puzzle[81])
 {
@@ -284,7 +330,7 @@ void Core::resume(Node* c)
     }
 }
 
-int Core::dance(Node* head, int solution[81],int &tag)
+int Core::dance(Node* head, int solution[81], int &tag)
 {
     if (head->right == head)
     {
@@ -296,9 +342,14 @@ int Core::dance(Node* head, int solution[81],int &tag)
         if (tag == 1)
         {
             tag = 2;
+            delete head;
             return 1;
         }
-        return 1;
+        if (tag == -1)
+        {
+            tag = 1;
+            return 1;
+        }
     }
     Node *i = head->right->right;
     Node *temp = head->right;
