@@ -2,7 +2,7 @@
 #include<exception>
 
 struct Node {
-    Node *up, *down, *left, *right, *col;
+    Node *up, *down, *left, *right, *col, *next;
     int row, count;
     int num[3] = { 0 };
 };
@@ -34,8 +34,15 @@ public:
     Node* toMatrix(int puzzle[81]);
     void remove(Node* c);
     void resume(Node* c);
-    int dance(Node* head, int solution[81], int &tag);
-    int DLX(int puzzle[81], int solution[81], int &tag);
+    int dance(Node* head, int solution[81]);
+    int dance(Node* head, int &tag);
+    bool DLX(int puzzle[81], int solution[81]);
+    bool isunique(int puzzle[81]);
+    void Delete(Node* n);
+    void init(Node* n);
+    //bool isunique(int puzzle[81]);
+    //bool backtrack(int puzzle[81], int solution[81]);
+    //bool isinarea(int sudoku[9][9], int x, int y, int num);
 
     _declspec(dllexport) void __stdcall generate(int number, int result[][81]);
     _declspec(dllexport) void __stdcall generate(int number, int mode, int result[][81]);

@@ -28,13 +28,9 @@ modeException::modeException() : exception("Exception: sudoku mode error\n")
 
 bool __stdcall Core::solve(int puzzle[81], int solution[81])
 {
-    int tag = -1;
-    DLX(puzzle, solution, tag);
-    if (tag == 1)
-    {
-        return true;
-    }
-    return false;
+    bool result = false;
+    result = DLX(puzzle, solution);
+    return result;
 }
 
 void __stdcall Core::generate(int number, int result[][81])
@@ -135,7 +131,7 @@ void __stdcall Core::generate(int number, int lower, int upper, bool unique, int
                 result[i][j] = 0;;
             }
         }
-    } 
+    }
 }
 
 bool __stdcall Core::blank(int puzzle[81], int mode)
@@ -170,7 +166,6 @@ bool __stdcall Core::blank(int puzzle[81], int lower, int upper, bool unique)
 {
     int blankNum = 0;
     int tag = -1;
-    int temp[81];
     int buf[81];
     if (lower < 20 || upper>55 || lower > upper)
     {
@@ -181,7 +176,7 @@ bool __stdcall Core::blank(int puzzle[81], int lower, int upper, bool unique)
         buf[i] = puzzle[i];
     }
     blankNum = (rand() % (upper - lower + 1)) + lower;
-    do
+    while(true)
     {
         for (int i = 0; i < 81; i++)
         {
@@ -200,26 +195,39 @@ bool __stdcall Core::blank(int puzzle[81], int lower, int upper, bool unique)
                 puzzle[j] = 0;
             }
         }
-        if (unique)
+        if (!unique)
         {
-            tag = 0;
-            DLX(puzzle, temp, tag);
+            break;
         }
-    } while (unique && (tag == 2));
+        if (unique && !isunique(puzzle))
+        {
+            break;
+        }
+    }
     return true;
 }
 
+void Core::init(Node* n)
+{
+    n->left = n->right = n->up = n->down = n->col = n->next = NULL;
+    n->row = n->count = n->num[0] = n->num[1] = n->num[2] = 0;
+}
 
 Node* Core::toMatrix(int puzzle[81])
 {
     int row_num = 0;
-    Node *head, *temp[4];
+    Node *head, *temp[4], *now;
     head = (Node*)malloc(sizeof(Node));
+    init(head);
     head->col = head->down = head->up = head;
+    now = head;
     Node *c[324];
     for (int i = 0; i < 324; i++)
     {
         c[i] = (Node*)malloc(sizeof(Node));
+        init(c[i]);
+        now->next = c[i];
+        now = c[i];
         c[i]->up = c[i];
         c[i]->down = c[i];
     }
@@ -255,6 +263,9 @@ Node* Core::toMatrix(int puzzle[81])
             for (int m = 0; m < 4; m++)
             {
                 temp[m] = (Node*)malloc(sizeof(Node));
+                init(temp[m]);
+                now->next = temp[m];
+                now = temp[m];
             }
             for (int m = 0; m < 4; m++)
             {
@@ -330,26 +341,11 @@ void Core::resume(Node* c)
     }
 }
 
-int Core::dance(Node* head, int solution[81], int &tag)
+int Core::dance(Node* head, int solution[81])
 {
     if (head->right == head)
     {
-        if (tag == 0)
-        {
-            tag = 1;
-            return 0;
-        }
-        if (tag == 1)
-        {
-            tag = 2;
-            delete head;
-            return 1;
-        }
-        if (tag == -1)
-        {
-            tag = 1;
-            return 1;
-        }
+        return 1;
     }
     Node *i = head->right->right;
     Node *temp = head->right;
@@ -371,7 +367,7 @@ int Core::dance(Node* head, int solution[81], int &tag)
             remove(j->col);
             j = j->right;
         }
-        if (dance(head, solution, tag))
+        if (dance(head, solution))
         {
             return 1;
         }
@@ -388,14 +384,98 @@ int Core::dance(Node* head, int solution[81], int &tag)
     return 0;
 }
 
-int Core::DLX(int puzzle[81], int solution[81], int &tag)
+int Core::dance(Node* head, int &tag)
+{
+    if (head->right == head)
+    {
+        if (tag == 0)
+        {
+            tag = 1;
+            return 0;
+        }
+        if (tag == 1)
+        {
+            tag = 2;
+            return 1;
+        }
+    }
+    Node *i = head->right->right;
+    Node *temp = head->right;
+    while (i != head)
+    {
+        if (i->count<temp->count)
+            temp = i;
+        i = i->right;
+    }
+    if (temp->down == temp)return 0;
+    remove(temp);
+    i = temp->down;
+    while (i != temp)
+    {
+        Node *j = i->right;
+        while (j != i)
+        {
+            remove(j->col);
+            j = j->right;
+        }
+        if (dance(head, tag))
+        {
+            return 1;
+        }
+        j = i->left;
+        while (j != i)
+        {
+            resume(j->col);
+            j = j->left;
+        }
+        i = i->down;
+    }
+    resume(temp);
+    return 0;
+}
+
+bool Core::DLX(int puzzle[81], int solution[81])
 {
     Node* head = toMatrix(puzzle);
+    int tag = 0;
     for (int i = 0; i < 81; i++)
     {
         solution[i] = 0;
     }
-    return dance(head, solution, tag);
+    tag = dance(head, solution);
+    Delete(head);
+    if (tag == 1)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Core::isunique(int puzzle[81])
+{
+    Node* head = toMatrix(puzzle);
+    int tag = 0;
+    dance(head, tag);
+    Delete(head);
+    if (tag == 1)
+    {
+        return true;
+    }
+    return false;
+}
+
+void Core::Delete(Node* n)
+{
+    Node* x1;
+    Node* x2;
+    x1 = n;
+    while (x1->next != NULL)
+    {
+        x2 = x1;
+        x1 = x1->next;
+        free(x2);
+    }
+    free(x1);
 }
 
 bool Core::isinraw(int num, int raw_num, int sudo[9][9])

@@ -2,6 +2,7 @@
 #include <sstream>
 #include <fstream>
 #include <time.h> 
+//#include "D://Core.h"
 #include "../Core/Core.h"
 
 char outputBuff[163000001];
@@ -157,7 +158,7 @@ int main(int argc, char* argv[])
             mode = myatoi(argv[i + 1]);
             if (mode == 0)
             {
-                std::cout << "参数错误：-n后面数字不合法" << std::endl;
+                std::cout << "参数错误：-m后面数字不合法" << std::endl;
                 return 1;
             }
             i = i + 2;
@@ -191,7 +192,7 @@ int main(int argc, char* argv[])
             }
             lower = myatoi(strtok(argv[i + 1], "~"));
             upper = myatoi(strtok(NULL, "~"));
-            if (lower == 0 || upper == 0 || strtok(NULL, "~") != NULL)
+            if (lower < 20 || upper > 55 || strtok(NULL, "~") != NULL)
             {
                 std::cout << "参数错误：-r后面范围不合法" << std::endl;
                 return 1;
@@ -255,7 +256,7 @@ int main(int argc, char* argv[])
             switch (state)
             {
             case 1:
-                test.generate(number, result_c);
+                test.generate(number, 0, 0, false,result_c);
                 break;
             case 3:
                 test.generate(number, 20, 55, false, result_c);
@@ -267,7 +268,7 @@ int main(int argc, char* argv[])
                 test.generate(number, lower, upper, false, result_c);
                 break;
             case 10:
-                test.generate(number, 20, 30, true, result_c);
+                test.generate(number, 20, 55, true, result_c);
                 break;
             case 11:
                 test.generate(number, lower, upper, true, result_c);
