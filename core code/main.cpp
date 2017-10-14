@@ -2,7 +2,6 @@
 #include <sstream>
 #include <fstream>
 #include <time.h> 
-//#include "D://Core.h"
 #include "../Core/Core.h"
 
 char outputBuff[163000001];
@@ -66,7 +65,6 @@ int main(int argc, char* argv[])
     std::string path;
     std::ifstream in;
     std::ofstream out;
-    srand((unsigned)time(NULL));
     for (int i = 1; i < argc;)
     {
         if (strcmp(argv[i], "-c") == 0)
@@ -256,7 +254,7 @@ int main(int argc, char* argv[])
             switch (state)
             {
             case 1:
-                test.generate(number, 0, 0, false,result_c);
+                test.generate(number, result_c);
                 break;
             case 3:
                 test.generate(number, 20, 55, false, result_c);
@@ -297,9 +295,15 @@ int main(int argc, char* argv[])
                 while ('0' > temp || temp > '9')
                     in >> temp;
                 sudoku[0] = temp - '0';
-                for (int i = 1; i < 81; i++) {
+                for (int i = 1; i < 81; i++)
+                {
                     in >> temp;
                     if (in.eof()) break;
+                    if ('0' > temp || temp > '9')
+                    {
+                        std::cout << "ÎÄ¼þÄÚÈÝ´íÎó" << std::endl;
+                        return 1;
+                    }
                     sudoku[i] = temp - '0';
                 }
                 if (in.eof())break;

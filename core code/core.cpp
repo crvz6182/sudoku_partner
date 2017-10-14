@@ -26,6 +26,11 @@ modeException::modeException() : exception("Exception: sudoku mode error\n")
 {
 }
 
+__stdcall Core::Core()
+{
+    srand((unsigned)time(NULL));
+}
+
 bool __stdcall Core::solve(int puzzle[81], int solution[81])
 {
     bool result = false;
@@ -40,7 +45,7 @@ void __stdcall Core::generate(int number, int result[][81])
     int nums[9] = { 0 };
     int sudo[9][9] = { 0 };
     int mark[9] = { 0 };
-    if (number < 1 || number>1000000)
+    if (number < 0 || number>1000000)
     {
         throw numberException();
         return;
@@ -48,6 +53,7 @@ void __stdcall Core::generate(int number, int result[][81])
     for (int i = 0; i < 9; i++) {
         int count = 0;
         int move = (rand() % (9 - i) + 1);
+
         for (int j = 0; j < 9; j++) {
             if (mark[j] == 0) count++;
             if (count == move) {
@@ -57,6 +63,7 @@ void __stdcall Core::generate(int number, int result[][81])
             }
         }
     }
+
     produce(number, nums, 0, count_total, 0, sudo, result);
 }
 
@@ -67,7 +74,7 @@ void __stdcall Core::generate(int number, int mode, int result[][81])
     int nums[9] = { 0 };
     int sudo[9][9] = { 0 };
     int mark[9] = { 0 };
-    if (number < 1 || number>10000)
+    if (number < 0 || number>10000)
     {
         throw numberException();
         return;
@@ -75,6 +82,7 @@ void __stdcall Core::generate(int number, int mode, int result[][81])
     for (int i = 0; i < 9; i++) {
         int count = 0;
         int move = (rand() % (9 - i) + 1);
+
         for (int j = 0; j < 9; j++) {
             if (mark[j] == 0) count++;
             if (count == move) {
@@ -84,6 +92,7 @@ void __stdcall Core::generate(int number, int mode, int result[][81])
             }
         }
     }
+
     produce(number, nums, 0, count_total, 0, sudo, result);
     for (int i = 0; i < number; i++)
     {
@@ -98,7 +107,7 @@ void __stdcall Core::generate(int number, int lower, int upper, bool unique, int
     int nums[9] = { 0 };
     int sudo[9][9] = { 0 };
     int mark[9] = { 0 };
-    if (number < 1 || number>10000)
+    if (number < 0 || number>10000)
     {
         throw numberException();
         return;
@@ -106,6 +115,7 @@ void __stdcall Core::generate(int number, int lower, int upper, bool unique, int
     for (int i = 0; i < 9; i++) {
         int count = 0;
         int move = (rand() % (9 - i) + 1);
+
         for (int j = 0; j < 9; j++) {
             if (mark[j] == 0) count++;
             if (count == move) {
@@ -115,22 +125,11 @@ void __stdcall Core::generate(int number, int lower, int upper, bool unique, int
             }
         }
     }
+
     produce(number, nums, 0, count_total, 0, sudo, result);
-    int temp[81] = { 0 };
     for (int i = 0; i < number; i++)
     {
-        for (int j = 0; j < 81; j++)
-        {
-            temp[j] = result[i][j];
-        }
-        blank(temp, lower, upper, unique);
-        for (int j = 0; j < 81; j++)
-        {
-            if (temp[j] == 0)
-            {
-                result[i][j] = 0;;
-            }
-        }
+        blank(result[i], lower, upper, unique);
     }
 }
 
@@ -165,7 +164,6 @@ bool __stdcall Core::blank(int puzzle[81], int mode)
 bool __stdcall Core::blank(int puzzle[81], int lower, int upper, bool unique)
 {
     int blankNum = 0;
-    int tag = -1;
     int buf[81];
     if (lower < 20 || upper>55 || lower > upper)
     {
@@ -199,7 +197,7 @@ bool __stdcall Core::blank(int puzzle[81], int lower, int upper, bool unique)
         {
             break;
         }
-        if (unique && !isunique(puzzle))
+        if (unique && isunique(puzzle))
         {
             break;
         }
@@ -443,6 +441,7 @@ bool Core::DLX(int puzzle[81], int solution[81])
         solution[i] = 0;
     }
     tag = dance(head, solution);
+
     Delete(head);
     if (tag == 1)
     {
@@ -503,10 +502,24 @@ bool Core::isincolumn(int num, int c_num, int sudo[9][9])
 
 int Core::insert(int num, int blocknum, int marked[], int sudo[9][9])
 {
-
-    int pos[9] = { 0,1,2,3,4,5,6,7,8 };
+    int pos1[9] = { 0,1,2,3,4,5,6,7,8 };
+    int pos[9] = { 0 };
+    int mark[9] = { 0 };
     int x;
     int y;
+    for (int i = 0; i < 9; i++) {
+        int count = 0;
+        int move = (rand() % (9 - i) + 1);
+
+        for (int j = 0; j < 9; j++) {
+            if (mark[j] == 0) count++;
+            if (count == move) {
+                pos[i] = pos1[j];
+                mark[j] = 1;
+                break;
+            }
+        }
+    }
     for (int i = 0; i < 9; i++)
     {
         x = (pos[i] / 3) + ((blocknum - 1) / 3) * 3;

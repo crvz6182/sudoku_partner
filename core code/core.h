@@ -40,9 +40,7 @@ public:
     bool isunique(int puzzle[81]);
     void Delete(Node* n);
     void init(Node* n);
-    //bool isunique(int puzzle[81]);
-    //bool backtrack(int puzzle[81], int solution[81]);
-    //bool isinarea(int sudoku[9][9], int x, int y, int num);
+    _declspec(dllexport) __stdcall Core();
 
     _declspec(dllexport) void __stdcall generate(int number, int result[][81]);
     _declspec(dllexport) void __stdcall generate(int number, int mode, int result[][81]);
