@@ -1,4 +1,4 @@
 <RCC>
-    <qresource prefix="sudokuGui">
+    <qresource prefix="sudokuGui1">
     </qresource>
 </RCC>

@@ -1,19 +1,19 @@
 #pragma once
 
 #include <QtWidgets/QMainWindow>
-#include "ui_sudokuGui.h"
+#include "ui_sudokuGui1.h"
 #include "Core.h"
 #include <qtextedit.h>
 #include <qlineedit.h>
 #include <qpushbutton.h>
 #include "MyLineEdit.h"
 
-class sudokuGui : public QMainWindow
+class sudokuGui1 : public QMainWindow
 {
 	Q_OBJECT
 
 public:
-	sudokuGui(QWidget *parent = Q_NULLPTR);
+	sudokuGui1(QWidget *parent = Q_NULLPTR);
 
 public slots:
 	void restartButtonCliked();
@@ -25,7 +25,7 @@ public slots:
 	void helpClicked();
 
 private:
-	Ui::sudokuGuiClass ui;
+	Ui::sudokuGui1Class ui;
 	int sudo[1][81];
 	int mode;
 	QTimer * timer;      //定时器 每秒更新时间

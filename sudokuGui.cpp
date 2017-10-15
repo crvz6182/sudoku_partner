@@ -1,4 +1,4 @@
-#include "sudokuGui.h"
+#include "sudokuGui1.h"
 #include <qtablewidget.h>
 #include <qboxlayout.h>
 #include <qpushbutton.h>
@@ -11,7 +11,7 @@
 #include <qtimer.h>
 #include <qevent.h>
 
-sudokuGui::sudokuGui(QWidget *parent)
+sudokuGui1::sudokuGui1(QWidget *parent)
 	: QMainWindow(parent)
 {
 	ui.setupUi(this);
@@ -117,7 +117,7 @@ sudokuGui::sudokuGui(QWidget *parent)
 }
 
 // 函数的实现
-void sudokuGui::restartButtonCliked()
+void sudokuGui1::restartButtonCliked()
 {
 	submitButton->setEnabled(true);
 	clearButton->setEnabled(true);
@@ -140,7 +140,7 @@ void sudokuGui::restartButtonCliked()
 	timer->start(1000);
 }
 
-void sudokuGui::clearButtonClicked()
+void sudokuGui1::clearButtonClicked()
 {
 	for (int i = 0; i < 81; i++)
 	{
@@ -151,7 +151,7 @@ void sudokuGui::clearButtonClicked()
 	}
 }
 
-void sudokuGui::submitButtonClicked()
+void sudokuGui1::submitButtonClicked()
 {
 	timer->stop();  // 计时器停止
 					// 更新最佳纪录
@@ -212,7 +212,7 @@ void sudokuGui::submitButtonClicked()
 	clearButton->setEnabled(false);
 }
 
-void sudokuGui::modeChooseCliked()
+void sudokuGui1::modeChooseCliked()
 {
 	// 判断是点击了哪种模式
 	QAction * action = qobject_cast<QAction*>(sender());
@@ -257,13 +257,13 @@ void sudokuGui::modeChooseCliked()
 	timer->start(1000);
 }
 
-void sudokuGui::updateTime()
+void sudokuGui1::updateTime()
 {
 	*TimeRecord = TimeRecord->addSecs(1);
 	nowRecord->setText(TimeRecord->toString("hh:mm:ss"));
 }
 
-void sudokuGui::hintCliked()
+void sudokuGui1::hintCliked()
 {
 	int resultSudo[81];
 	int rSudo[81];
@@ -294,7 +294,7 @@ void sudokuGui::hintCliked()
 	}
 }
 
-void sudokuGui::helpClicked()
+void sudokuGui1::helpClicked()
 {
 	QMessageBox::information(this, "Help", "HOW TO PALY THE GAME?\n enter 1-9 in the blank block \n HOW TO CHOSSE MODE?\n click Game in Menu, then choose the mode\n HOW TO GET HINT?\n click the block with right button");
 }

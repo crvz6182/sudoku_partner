@@ -1,53 +1,67 @@
 #pragma once
-#include<exception>
 
-struct Node {
-    Node *up, *down, *left, *right, *col, *next;
-    int row, count;
-    int num[3] = { 0 };
-};
+#include <iostream>
+#include <time.h>
 
-class numberException :public std::exception
+using namespace std;
+
+class NumberException :public exception
 {
 public:
-    numberException();
+    NumberException();
 };
 
-class boundException :public std::exception
+class ModeException :public exception
 {
 public:
-    boundException();
+    ModeException();
 };
 
-class modeException :public std::exception
+class RangeException :public exception
 {
 public:
-    modeException();
+    RangeException();
+};
+
+class ValidException :public exception
+{
+public:
+    ValidException();
+};
+
+class FinalMaker
+{
+public:
+    void make(int final[9][9]);
+    void shuffle(int array[9]);
+    bool fillRow(int final[9][9], int row);
+    bool fill(int final[9][9], int row, int col);
+    bool checkValid(int final[9][9], int row, int col, int value);
+};
+
+class PuzzleSovlver
+{
+public:
+    bool checkValid(int final[9][9]);
+    void init();
+    void link(int final[9][9]);
+    void insertNode(int col, int no);
+    void remove(int col);
+    void restore(int col);
+    bool findOneSolution(int final[9][9], int select);
+    bool findSolutions(int final[9][9], int select, int& solution);
+    bool checkUnique(int final[9][9]);   
 };
 
 class Core
 {
 public:
-    _declspec(dllexport) bool __stdcall solve(int puzzle[81], int solution[81]);
-    _declspec(dllexport) bool __stdcall blank(int puzzle[81], int mode);
-    _declspec(dllexport) bool __stdcall blank(int puzzle[81], int lower, int upper, bool unique);
-    Node* toMatrix(int puzzle[81]);
-    void remove(Node* c);
-    void resume(Node* c);
-    int dance(Node* head, int solution[81]);
-    int dance(Node* head, int &tag);
-    bool DLX(int puzzle[81], int solution[81]);
-    bool isunique(int puzzle[81]);
-    void Delete(Node* n);
-    void init(Node* n);
-    _declspec(dllexport) __stdcall Core();
-
-    _declspec(dllexport) void __stdcall generate(int number, int result[][81]);
-    _declspec(dllexport) void __stdcall generate(int number, int mode, int result[][81]);
-    _declspec(dllexport) void __stdcall generate(int number, int lower, int upper, bool unique, int result[][81]);
-    void produce(int total, int nums[], int block_num, int & count_total, int count_nums, int sudo[9][9], int result[][81]);
-    bool isinraw(int num, int raw_num, int sudo[9][9]);
-    bool isincolumn(int num, int c_num, int sudo[9][9]);
-    int insert(int num, int blocknum, int marked[], int sudo[9][9]);
-    void out(int sudo[9][9], int result[][81], int count_total);
+    __declspec(dllexport) void generate(int number, int mode, int result[][81]);
+    __declspec(dllexport) void generate(int number, int lower, int upper, bool unique, int result[][81]);
+    __declspec(dllexport) bool solve(int puzzle[81], int solution[81]);
+private:
+    FinalMaker fm;
+    PuzzleSovlver ps;
+    void hollowUnique(int final[9][9], int blanks);
+    void hollowRandom(int final[9][9], int blanks);
 };
